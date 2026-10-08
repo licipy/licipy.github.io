@@ -18,7 +18,7 @@ import re
 import shutil
 from datetime import datetime
 
-from comun import (CARPETA_RE, PY, SITIO, commit_y_push, fecha, leer_config, ruta_config,
+from comun import (CARPETA_RE, PY, SITIO, commit_y_push, error, fecha, leer_config, ruta_config,
                    verificar_identidad)
 
 META_RE = re.compile(r'<meta name="licipy-vence" content="([^"]+)"')
@@ -63,7 +63,11 @@ def main():
     for c in vencidas:
         print(f"  {c[:6]}…" + (" (simulado)" if a.simular else ""))
         if not a.simular:
-            shutil.rmtree(SITIO / c)
+            # En Windows la carpeta vacía a veces queda trabada (Explorador, antivirus): da igual,
+            # git no guarda carpetas vacías. Lo que importa es que no quede ningún archivo.
+            shutil.rmtree(SITIO / c, ignore_errors=True)
+            if any(p.is_file() for p in (SITIO / c).rglob("*")):
+                error(f"no se pudieron borrar los archivos de {c[:6]}…: cierre lo que los tenga abiertos")
     hubo = bool(vencidas) and not a.simular and commit_y_push(
         f"Retirar {len(vencidas)} simulador(es) vencido(s)", ["sitio"], push=not a.sin_push)
     if os.environ.get("GITHUB_OUTPUT"):
