@@ -1,0 +1,79 @@
+<div class="wrap" id="expired" hidden>
+  <div class="top"><div class="logo">Lici<span>Py</span></div><div class="tag">Potenciamos sus licitaciones con inteligencia</div></div>
+  <section class="panel">
+    <h1>Este simulador venció</h1>
+    <p class="lead">Fue preparado para el llamado {{LLAMADO}} de {{ENTIDAD}}, cuyo cierre es el {{CIERRE_FECHA}}. Estuvo disponible hasta el {{VENCE_TXT}}.</p>
+    <p class="lead">Para su próximo llamado, pida un simulador nuevo con datos actualizados de la DNCP.</p>
+    <p class="close">No trabajamos con paquetes cerrados: nos adaptamos a las necesidades de cada cliente.</p>
+  </section>
+  <section class="notes"><p>LiciPy · Información de fuentes públicas (DNCP, datos abiertos). No garantiza la adjudicación.</p></section>
+</div>
+
+<div class="wrap" id="live">
+  <div class="top">
+    <div class="logo">Lici<span>Py</span></div>
+    <div class="tag">Potenciamos sus licitaciones con inteligencia</div>
+  </div>
+
+  <header>
+    <h1>¿Dónde pararse con el precio en el {{LLAMADO}}?</h1>
+    <p class="lead">Cargue su costo, mueva la meta y vea en el momento su ganancia, a qué competidores queda por debajo y cómo se adjudicó esta convocante según cuántos oferentes se presentaron.</p>
+    <p class="motto">Antes de ofertar, sepa cómo se adjudicó: quién compitió, a qué precio y dónde pararse.</p>
+    <div class="meta">
+      <span>{{ENTIDAD}} · <b>{{OBJETO}}</b></span>
+      <span>{{MODALIDAD}} · máx. <b>{{MONTO_TXT}}</b></span>
+      <span>Cierre <b>{{CIERRE_TXT}}</b></span>
+      <span>Preparado para su llamado <b>{{LLAMADO}}</b></span>
+      <span>Datos al {{DATOS_AL}} · <b>disponible hasta el {{VENCE_TXT}}</b></span>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>1. Sus números</h2>
+    <p class="hint">Su costo como porcentaje del referencial: cuánto le cuesta realmente (materiales y mano de obra) cada trabajo del pliego, comparado con el precio del pliego. Si no lo sabe exacto, empiece con una estimación y ajústela.</p>
+    <div class="inputs">
+      <label for="costo">Su costo directo (% del referencial)<input id="costo" type="number" min="10" max="110" step="1" inputmode="decimal"></label>
+      <label for="fijos">Gastos fijos del contrato (Gs.)<input id="fijos" type="number" min="0" step="1000000" inputmode="numeric"></label>
+      <label for="ofer">¿Cuántos oferentes espera?<input id="ofer" type="number" min="1" max="12" step="1" inputmode="numeric"></label>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>2. Mueva su meta</h2>
+      <p class="hint">La meta es su precio promedio sobre el referencial del pliego. Las líneas son el porcentaje al que ganaron los competidores de {{SIGLA}}; la zona roja, donde perdería plata.</p>
+      <div class="metaRow"><div class="big" id="metaTxt">–</div><span>de su referencial</span></div>
+      <div class="ruler" id="ruler">
+        <div class="track"></div>
+        <div class="loss" id="loss"></div><div class="lossTxt" id="lossTxt"></div>
+        <input type="range" id="meta" step="0.005" aria-label="Su meta de precio, porcentaje del referencial">
+      </div>
+      <div class="scale" id="scale"></div>
+      <div class="legend"><span class="l1">Su meta</span><span class="l2">Competidor (ganó a ese %)</span><span class="l3">Zona de pérdida</span><span class="l4">Rango adjudicado</span></div>
+      <div class="bands" id="bands"></div>
+    </section>
+
+    <section class="panel res" aria-live="polite">
+      <div class="kpi"><span>Ganancia estimada</span><b id="gan">–</b><small id="ganSub"></small></div>
+      <div class="kpi"><span>Margen sobre lo facturado</span><b id="mar">–</b><small>sin IVA, antes del impuesto a la renta</small></div>
+      <div class="kpi verdict" id="verd"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>3. Sus ítems a esa meta</h2>
+    <p class="hint">{{ITEMS_HINT}}</p>
+    <div class="tw"><table>
+      <thead><tr><th>Ítem</th><th>Unidad</th><th class="n">Referencial</th><th class="n">A batir</th><th class="n">Su precio a la meta</th><th class="n">Diferencia</th></tr></thead>
+      <tbody id="items"></tbody>
+    </table></div>
+  </section>
+
+  <section class="notes">
+    <p><b>Cómo calcula.</b> {{COMO_CALCULA}}</p>
+    <p><b>Fuentes.</b> {{FUENTES}}</p>
+    <p><i>Cómo se adjudicó antes este llamado: la base de su estrategia para ganar.</i></p>
+    <p class="close">No trabajamos con paquetes cerrados: nos adaptamos a las necesidades de cada cliente.</p>
+    <p>LiciPy · Información de fuentes públicas (DNCP, datos abiertos). No garantiza la adjudicación.</p>
+  </section>
+</div>

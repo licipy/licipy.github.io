@@ -1,0 +1,7 @@
+# Datos de llamados y la configuración cliente -> carpeta NUNCA van al repositorio
+*.csv
+datos_*.json
+config/
+salidas/
+__pycache__/
+.env

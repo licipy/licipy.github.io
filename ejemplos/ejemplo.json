@@ -1,0 +1,73 @@
+{
+  "llamado": "000000",
+  "entidad": "Entidad Convocante de Ejemplo",
+  "sigla": "la entidad",
+  "objeto": "Objeto de ejemplo",
+  "modalidad": "Contrato abierto",
+  "monto": 100000000,
+  "cierre": "2030-01-15T09:00:00-03:00",
+  "datos_al": "2030-01-01",
+  "escala": [
+    0.4,
+    1.1
+  ],
+  "inicial": {
+    "costo": 68,
+    "fijos": 35000000,
+    "oferentes": 2,
+    "meta": 0.9
+  },
+  "comparables": [
+    {
+      "nombre": "Competidor A",
+      "pct": 0.98,
+      "fila": 0
+    },
+    {
+      "nombre": "Competidor B",
+      "pct": 0.9,
+      "fila": 1
+    }
+  ],
+  "bandas": [
+    {
+      "etiqueta": "1 oferente · 5",
+      "hasta": 1,
+      "lo": 0.99,
+      "hi": 1.0,
+      "med": 1.0
+    },
+    {
+      "etiqueta": "2 oferentes · 7",
+      "hasta": 3,
+      "lo": 0.85,
+      "hi": 1.0,
+      "med": 0.995
+    },
+    {
+      "etiqueta": "4 oferentes · 1",
+      "hasta": 5,
+      "lo": 0.75,
+      "hi": 0.75,
+      "med": 0.75
+    },
+    {
+      "etiqueta": "6 o más · otras",
+      "hasta": null,
+      "lo": 0.353,
+      "hi": 0.757,
+      "med": 0.75
+    }
+  ],
+  "bandas_nota": "Barras: rango adjudicado según cantidad de oferentes (ejemplo).",
+  "items_hint": "Ítems de ejemplo.",
+  "items": [
+    {
+      "descripcion": "Ítem de ejemplo",
+      "unidad": "Unidad",
+      "referencial": 100000,
+      "a_batir": 95000
+    }
+  ],
+  "fuentes": "Datos de ejemplo, no reales."
+}

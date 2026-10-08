@@ -1,0 +1,59 @@
+name: Publicar sitio
+
+# Publica sitio/ en GitHub Pages. Cada hora retira los simuladores vencidos:
+# la fecha sale del secret VENCIMIENTOS (líneas "carpeta:fecha", sin nombres) y de la marca
+# licipy-vence de cada página. No lee datos de clientes.
+on:
+  push:
+    branches: [main]
+    paths: ["sitio/**"]
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  limpiar:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      cambios: ${{ steps.limpiar.outputs.cambios }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retirar vencidos
+        id: limpiar
+        env:
+          VENCIMIENTOS: ${{ secrets.VENCIMIENTOS }}
+        run: |
+          git config --local user.name "LiciPy"
+          git config --local user.email "licipy@users.noreply.github.com"
+          python scripts/limpiar_vencidos.py
+
+  publicar:
+    needs: limpiar
+    if: >-
+      always() && needs.limpiar.result != 'failure' &&
+      (github.event_name != 'schedule' || needs.limpiar.outputs.cambios == 'si')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: sitio
+          retention-days: 1
+      - id: deploy
+        uses: actions/deploy-pages@v4
