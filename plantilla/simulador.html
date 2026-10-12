@@ -92,6 +92,7 @@ table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}
 th{background:var(--brand);color:var(--panel);text-align:left;padding:8px 10px;font-weight:600}
 td{padding:7px 10px;border-top:1px solid var(--line)}
 td.n,th.n{text-align:right;font-family:var(--mono);font-size:12.5px}
+#comps td.n,#comps td:first-child{white-space:nowrap} #comps small{color:var(--muted)}
 tr.under td.d{color:var(--win)} tr.over td.d{color:var(--loss)}
 .notes{font-size:12.5px;color:var(--muted);display:grid;gap:6px;max-width:80ch}
 .notes p{margin:0}
@@ -148,6 +149,14 @@ D.bandas.forEach((b,k)=>{const e=document.createElement("div");e.className="band
   e.innerHTML=`<div class="lab">${esc(b.etiqueta)}</div><div class="bt"><div class="bf" style="left:${pos(b.lo)}%;width:${Math.max(1.2,pos(b.hi)-pos(b.lo))}%"></div><div class="bm" style="left:${pos(b.med)}%"></div></div>`;bh.appendChild(e);});
 if(D.bandas_nota){const bt=document.createElement("p");bt.className="hint";bt.style.margin="2px 0 0";bt.textContent=D.bandas_nota;bh.appendChild(bt);}
 
+const fdmy=f=>f?f.slice(8,10)+"/"+f.slice(5,7)+"/"+f.slice(0,4):"";
+const C=D.competidores||[];
+if(!C.length){$("compSec").remove();}
+else{$("comps").innerHTML=C.map(c=>{
+  const rango=Math.abs(c.max-c.min)<5e-4?pct(c.min):`${pct(c.min)} – ${pct(c.max)}`;
+  const det=c.adjudicaciones&&c.adjudicaciones.length?c.adjudicaciones.map(a=>`${fdmy(a.fecha)}: ${pct(a.pct)}`).join("<br>"):"más de 6: ver rango";
+  const fuera=c.fuera?`<br><small>${c.fuera} más fuera del 60–150 % del referencial, no cuentan</small>`:"";
+  return `<tr><td>${esc(c.nombre)}</td><td class="n">${c.n} ${c.n===1?"vez":"veces"}</td><td class="n">${rango}</td><td class="n">${fdmy(c.ultima_fecha)} · ${pct(c.ultima_pct)}</td><td>${det}${fuera}</td></tr>`}).join("");}
 function band(n){for(let i=0;i<D.bandas.length;i++){const h=D.bandas[i].hasta;if(h==null||n<=h)return i;}return D.bandas.length-1;}
 function update(){
   const m=+r.value, c=Math.max(0,+$("costo").value||0)/100, F=Math.max(0,+$("fijos").value||0), n=Math.max(1,+$("ofer").value||1);

@@ -60,8 +60,17 @@
     </section>
   </div>
 
+  <section class="panel" id="compSec">
+    <h2>3. Quién ganó en {{SIGLA}} y a qué precio</h2>
+    <p class="hint">Cada competidor que adjudicó en esta convocante en 24 meses: cuántas veces ganó, entre qué porcentajes del referencial se movió y cuándo fue la última. Con más de seis adjudicaciones se muestra solo el resumen.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Competidor</th><th class="n">Ganó</th><th class="n">Rango</th><th class="n">Última</th><th>Adjudicaciones</th></tr></thead>
+      <tbody id="comps"></tbody>
+    </table></div>
+  </section>
+
   <section class="panel">
-    <h2>3. Sus ítems a esa meta</h2>
+    <h2>4. Sus ítems a esa meta</h2>
     <p class="hint">{{ITEMS_HINT}}</p>
     <div class="tw"><table>
       <thead><tr><th>Ítem</th><th>Unidad</th><th class="n">Referencial</th><th class="n">A batir</th><th class="n">Su precio a la meta</th><th class="n">Diferencia</th></tr></thead>

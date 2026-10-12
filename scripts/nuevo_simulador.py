@@ -5,6 +5,9 @@
 
 El JSON del llamado lleva solo datos públicos de la DNCP (ver ejemplos/ejemplo.json). Antes de
 generar se rechaza si tiene campos o textos de cliente (nombre, RUC, teléfono, correo, palabras prohibidas).
+Los nombres que vienen del registro público (convocante, adjudicatarios, ítems del pliego) no se
+bloquean por nombre: son datos de la DNCP, no contactos nuestros. RUC, teléfono y correo se
+rechazan en cualquier campo.
 
 El contenido de la página va cifrado (AES-GCM). La clave viaja solo en el enlace, después de
 "#", y el navegador no la manda al servidor: en el repositorio público queda solo texto cifrado.
@@ -42,8 +45,13 @@ CAMPOS_PROHIBIDOS = {
     "whatsapp", "correo", "email", "mail", "contacto", "preparadopara", "destinatario", "para",
     "oferente", "proveedor", "empresa", "direccion", "nombre",
 }
-# "nombre" se permite solo dentro de "comparables" (competidores, dato público de la DNCP)
-NOMBRE_PERMITIDO_EN = {"comparables"}
+# "nombre" se permite solo dentro de "comparables" y "competidores" (adjudicatarios, dato público de la DNCP)
+NOMBRE_PERMITIDO_EN = {"comparables", "competidores"}
+# Campos que salen del registro público de la DNCP: ahí un nombre propio es la convocante, un
+# adjudicatario o un ítem del pliego, nunca un contacto nuestro. No pasan por las palabras
+# prohibidas ni por LICIPY_PROHIBIDAS (que es para destinatarios y cliente_ref).
+CAMPOS_PUBLICOS = {"entidad", "sigla", "objeto"}
+SUBCAMPOS_PUBLICOS = {"comparables": {"nombre"}, "competidores": {"nombre"}, "items": {"descripcion", "unidad"}}
 TEXTOS_PROHIBIDOS = [
     (re.compile(r"\b\d{5,8}-\d\b"), "RUC"),
     (re.compile(r"(\+?595|\b0)9\d{2}[\s.-]?\d{3}[\s.-]?\d{3}\b"), "teléfono"),
@@ -93,23 +101,25 @@ def norm(k):
     return re.sub(r"[^a-z]", "", k)
 
 
-def validar(d, ruta="", padre=""):
-    """Lista de problemas: campos de cliente y textos con RUC, teléfono, correo o palabras prohibidas."""
+def validar(d, ruta="", padre="", publico=False):
+    """Lista de problemas: campos de cliente y textos con RUC, teléfono, correo o palabras prohibidas.
+    `publico`: el texto viene del registro de la DNCP; se revisa RUC/teléfono/correo, no los nombres."""
     malos = []
     if isinstance(d, dict):
         for k, v in d.items():
             n = norm(k)
             if n in CAMPOS_PROHIBIDOS and not (n == "nombre" and padre in NOMBRE_PERMITIDO_EN):
                 malos.append(f"campo prohibido '{ruta}{k}'")
-            malos += validar(v, f"{ruta}{k}.", k)
+            pub = publico or (not ruta and k in CAMPOS_PUBLICOS) or k in SUBCAMPOS_PUBLICOS.get(padre, ())
+            malos += validar(v, f"{ruta}{k}.", padre if isinstance(v, (str, int, float)) else k, pub)
     elif isinstance(d, list):
         for i, v in enumerate(d):
-            malos += validar(v, f"{ruta}{i}.", padre)
+            malos += validar(v, f"{ruta}{i}.", padre, publico)
     elif isinstance(d, str):
         for rx, que in TEXTOS_PROHIBIDOS:
             if rx.search(d):
                 malos.append(f"{que} en '{ruta.rstrip('.')}': {d[:60]!r}")
-        if palabra_prohibida(d):
+        if not publico and palabra_prohibida(d):
             malos.append(f"palabra prohibida en '{ruta.rstrip('.')}'")
     return malos
 
@@ -165,6 +175,7 @@ def main():
     for k, v in valores.items():
         contenido = contenido.replace("{{" + k + "}}", v)
     datos = {k: d[k] for k in ("monto", "escala", "inicial", "comparables", "bandas", "items")}
+    datos["competidores"] = d.get("competidores", [])
     datos["bandas_nota"] = d.get("bandas_nota", "")
     datos["iva_divisor"] = d.get("iva_divisor", 1.1)
     carga = json.dumps({"titulo": f"Simulador de precio {d['llamado']}", "html": contenido, "datos": datos},
@@ -178,7 +189,12 @@ def main():
     pagina = (PLANTILLA / "simulador.html").read_text(encoding="utf-8").replace("{{VENCE_ISO}}", iso(vence))
     if "{{" in pagina.replace("{{CIFRADO}}", "") or "{{" in contenido:
         error("quedaron marcadores sin reemplazar en la plantilla")
-    for texto in (pagina, contenido):         # se revisa antes de meter el cifrado
+    # La página se revisa sin los campos públicos (convocante, objeto): un nombre del registro de
+    # la DNCP no es un contacto nuestro. Lo nuestro (textos, plantilla) pasa por todo.
+    revision = contenido
+    for k in ("ENTIDAD", "SIGLA", "OBJETO"):
+        revision = revision.replace(valores[k], "")
+    for texto in (pagina, revision):         # se revisa antes de meter el cifrado
         for rx, que in TEXTOS_PROHIBIDOS:
             if rx.search(texto):
                 error(f"la página generada contiene {que}: {rx.search(texto).group(0)!r}")
